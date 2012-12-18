@@ -1,0 +1,7 @@
+*.DS_Store
+.gitignore~
+*.mode1v3
+*.pbxuser
+build/*
+*project.xcworkspace/
+*xcuserdata/
