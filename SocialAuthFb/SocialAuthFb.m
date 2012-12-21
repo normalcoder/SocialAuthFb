@@ -130,7 +130,7 @@
                               if ([fbAccounts count] > 0) {
                                   id account = [fbAccounts objectAtIndex:0];
                                   
-                                  dispatch_queue_t q = dispatch_get_current_queue();
+                                  dispatch_queue_t q = dispatch_get_main_queue();
                                   
                                   [accountStore renewCredentialsForAccount:account completion:
                                    ^(ACAccountCredentialRenewResult renewResult, NSError *error) {
@@ -192,7 +192,7 @@
     if ([fbAccounts count] > 0) {
         id account = [fbAccounts objectAtIndex:0];
         
-        dispatch_queue_t q = dispatch_get_current_queue();
+        dispatch_queue_t q = dispatch_get_main_queue();
         
         [accountStore renewCredentialsForAccount:account completion:
          ^(ACAccountCredentialRenewResult renewResult, NSError *error) {
