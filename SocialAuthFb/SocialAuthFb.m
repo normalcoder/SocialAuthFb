@@ -179,7 +179,30 @@
 - (void)loginAllowUi:(BOOL)allowUi
              success:(void (^)(SocialAuthFbSuccessObject *))success
              failure:(void (^)(NSError *))failure {
-    [self testLoginAllowUi:allowUi success:success failure:failure attemptsRemaining:4];
+    [[FBSession activeSession] closeAndClearTokenInformation];
+    
+    ACAccountStore * accountStore = [[ACAccountStore alloc] init];
+    
+    NSArray * fbAccounts =
+    [accountStore
+     accountsWithAccountType:
+     [accountStore
+      accountTypeWithAccountTypeIdentifier:ACAccountTypeIdentifierFacebook]];
+    
+    if ([fbAccounts count] > 0) {
+        id account = [fbAccounts objectAtIndex:0];
+        
+        dispatch_queue_t q = dispatch_get_current_queue();
+        
+        [accountStore renewCredentialsForAccount:account completion:
+         ^(ACAccountCredentialRenewResult renewResult, NSError *error) {
+             dispatch_async(q, ^{
+                 [self testLoginAllowUi:allowUi success:success failure:failure attemptsRemaining:4];
+             });
+         }];
+    } else {
+        [self testLoginAllowUi:allowUi success:success failure:failure attemptsRemaining:4];
+    }
 }
 
 - (void)logoutFinish:(void (^)())finish {
