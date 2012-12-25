@@ -119,28 +119,34 @@
                           //requestForMe failed due to error validating access token (code 190), so retry login
                           
                           if (attemptsRemaining > 0) {
-                              ACAccountStore * accountStore = [[ACAccountStore alloc] init];
-                              
-                              NSArray * fbAccounts =
-                              [accountStore
-                               accountsWithAccountType:
-                               [accountStore
-                                accountTypeWithAccountTypeIdentifier:ACAccountTypeIdentifierFacebook]];
-                              
-                              if ([fbAccounts count] > 0) {
-                                  id account = [fbAccounts objectAtIndex:0];
+                              if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 6.0) {
+                                  ACAccountStore * accountStore = [[ACAccountStore alloc] init];
+                                  NSArray * fbAccounts =
+                                  [accountStore
+                                   accountsWithAccountType:
+                                   [accountStore
+                                    accountTypeWithAccountTypeIdentifier:ACAccountTypeIdentifierFacebook]];
                                   
-                                  dispatch_queue_t q = dispatch_get_main_queue();
-                                  
-                                  [accountStore renewCredentialsForAccount:account completion:
-                                   ^(ACAccountCredentialRenewResult renewResult, NSError *error) {
-                                       dispatch_async(q, ^{
-                                           [self testLoginAllowUi:allowUi
-                                                          success:success
-                                                          failure:failure
-                                                attemptsRemaining:attemptsRemaining - 1];
-                                       });
-                                   }];
+                                  if ([fbAccounts count] > 0) {
+                                      id account = [fbAccounts objectAtIndex:0];
+                                      
+                                      dispatch_queue_t q = dispatch_get_main_queue();
+                                      
+                                      [accountStore renewCredentialsForAccount:account completion:
+                                       ^(ACAccountCredentialRenewResult renewResult, NSError *error) {
+                                           dispatch_async(q, ^{
+                                               [self testLoginAllowUi:allowUi
+                                                              success:success
+                                                              failure:failure
+                                                    attemptsRemaining:attemptsRemaining - 1];
+                                           });
+                                       }];
+                                  } else {
+                                      [self testLoginAllowUi:allowUi
+                                                     success:success
+                                                     failure:failure
+                                           attemptsRemaining:attemptsRemaining - 1];
+                                  }
                               } else {
                                   [self testLoginAllowUi:allowUi
                                                  success:success
@@ -181,25 +187,27 @@
              failure:(void (^)(NSError *))failure {
     [[FBSession activeSession] closeAndClearTokenInformation];
     
-    ACAccountStore * accountStore = [[ACAccountStore alloc] init];
-    
-    NSArray * fbAccounts =
-    [accountStore
-     accountsWithAccountType:
-     [accountStore
-      accountTypeWithAccountTypeIdentifier:ACAccountTypeIdentifierFacebook]];
-    
-    if ([fbAccounts count] > 0) {
-        id account = [fbAccounts objectAtIndex:0];
-        
-        dispatch_queue_t q = dispatch_get_main_queue();
-        
-        [accountStore renewCredentialsForAccount:account completion:
-         ^(ACAccountCredentialRenewResult renewResult, NSError *error) {
-             dispatch_async(q, ^{
-                 [self testLoginAllowUi:allowUi success:success failure:failure attemptsRemaining:4];
-             });
-         }];
+    if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 6.0) {
+        ACAccountStore * accountStore = [[ACAccountStore alloc] init];
+        NSArray * fbAccounts =
+        [accountStore
+         accountsWithAccountType:
+         [accountStore
+          accountTypeWithAccountTypeIdentifier:ACAccountTypeIdentifierFacebook]];
+        if ([fbAccounts count] > 0) {
+            id account = [fbAccounts objectAtIndex:0];
+            
+            dispatch_queue_t q = dispatch_get_main_queue();
+            
+            [accountStore renewCredentialsForAccount:account completion:
+             ^(ACAccountCredentialRenewResult renewResult, NSError *error) {
+                 dispatch_async(q, ^{
+                     [self testLoginAllowUi:allowUi success:success failure:failure attemptsRemaining:4];
+                 });
+             }];
+        } else {
+            [self testLoginAllowUi:allowUi success:success failure:failure attemptsRemaining:4];
+        }
     } else {
         [self testLoginAllowUi:allowUi success:success failure:failure attemptsRemaining:4];
     }
