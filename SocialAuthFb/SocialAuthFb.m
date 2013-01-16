@@ -104,12 +104,9 @@
          switch (state) {
              case FBSessionStateOpenTokenExtended:
              case FBSessionStateOpen: {
-                 NSLog(@"token: %@", [[FBSession activeSession] accessToken]);
                  [FBRequestConnection startForMeWithCompletionHandler:
                   ^(FBRequestConnection *connection, NSDictionary<FBGraphUser> *user, NSError * e) {
-                      NSLog(@"e: %@", e);
                       if (!e) {
-                          NSLog(@"user: %@", user);
                           success
                           ([SocialAuthFbSuccessObject
                             socialAuthSuccessObjectFbWithToken:[FBSession activeSession].accessToken
