@@ -109,7 +109,7 @@
                       if (!e) {
                           success
                           ([SocialAuthFbSuccessObject
-                            socialAuthSuccessObjectFbWithToken:[FBSession activeSession].accessToken
+                            socialAuthSuccessObjectFbWithToken:[FBSession activeSession].accessTokenData.accessToken
                             user:user]);
                           
                       } else if ([[e userInfo][FBErrorParsedJSONResponseKey][@"body"][@"error"][@"code"] compare:@190] == NSOrderedSame) {
