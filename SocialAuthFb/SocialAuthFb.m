@@ -90,16 +90,36 @@
 
 - (void)loginSuccess:(void (^)(SocialAuthFbSuccessObject *))success
              failure:(void (^)(NSError *))failure {
-    [self loginAllowUi:YES success:success failure:failure];
+    [self loginAllowUi:YES urlSchemeSuffix:@"" success:success failure:failure];
+}
+
+- (void)loginWithURLSchemeSuffix:(NSString *)suffix
+                         success:(void (^)(SocialAuthFbSuccessObject *))success
+                         failure:(void (^)(NSError *))failure {
+    [self loginAllowUi:YES urlSchemeSuffix:suffix success:success failure:failure];
 }
 
 - (void)testLoginAllowUi:(BOOL)allowUi
+         urlSchemeSuffix:(NSString *)suffix
                  success:(void (^)(SocialAuthFbSuccessObject *))success
                  failure:(void (^)(NSError *))failure
        attemptsRemaining:(NSInteger)attemptsRemaining {
-    [FBSession openActiveSessionWithReadPermissions:[self fbReadPermissions]
-                                       allowLoginUI:allowUi
-                                  completionHandler:
+    
+    NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
+    
+    FBSession * session =
+    [[FBSession alloc] initWithAppID:[defaults objectForKey:@"FacebookAppID"]
+                         permissions:[self fbReadPermissions]
+                     urlSchemeSuffix:suffix ?: @""
+                  tokenCacheStrategy:nil];
+    
+    if (!allowUi && session.state != FBSessionStateCreatedTokenLoaded) {
+        return;
+    }
+    
+    [FBSession setActiveSession:session];
+    [session openWithBehavior:FBSessionLoginBehaviorWithFallbackToWebView
+            completionHandler:    
      ^(FBSession * session, FBSessionState state, NSError * e) {
          switch (state) {
              case FBSessionStateOpenTokenExtended:
@@ -133,6 +153,7 @@
                                        ^(ACAccountCredentialRenewResult renewResult, NSError *error) {
                                            dispatch_async(q, ^{
                                                [self testLoginAllowUi:allowUi
+                                                      urlSchemeSuffix:suffix
                                                               success:success
                                                               failure:failure
                                                     attemptsRemaining:attemptsRemaining - 1];
@@ -140,12 +161,14 @@
                                        }];
                                   } else {
                                       [self testLoginAllowUi:allowUi
+                                             urlSchemeSuffix:suffix
                                                      success:success
                                                      failure:failure
                                            attemptsRemaining:attemptsRemaining - 1];
                                   }
                               } else {
                                   [self testLoginAllowUi:allowUi
+                                         urlSchemeSuffix:suffix
                                                  success:success
                                                  failure:failure
                                        attemptsRemaining:attemptsRemaining - 1];
@@ -180,6 +203,7 @@
 }
 
 - (void)loginAllowUi:(BOOL)allowUi
+     urlSchemeSuffix:(NSString *)suffix
              success:(void (^)(SocialAuthFbSuccessObject *))success
              failure:(void (^)(NSError *))failure {
     [[FBSession activeSession] closeAndClearTokenInformation];
@@ -199,14 +223,14 @@
             [accountStore renewCredentialsForAccount:account completion:
              ^(ACAccountCredentialRenewResult renewResult, NSError *error) {
                  dispatch_async(q, ^{
-                     [self testLoginAllowUi:allowUi success:success failure:failure attemptsRemaining:4];
+                     [self testLoginAllowUi:allowUi urlSchemeSuffix:suffix success:success failure:failure attemptsRemaining:4];
                  });
              }];
         } else {
-            [self testLoginAllowUi:allowUi success:success failure:failure attemptsRemaining:4];
+            [self testLoginAllowUi:allowUi urlSchemeSuffix:suffix success:success failure:failure attemptsRemaining:4];
         }
     } else {
-        [self testLoginAllowUi:allowUi success:success failure:failure attemptsRemaining:4];
+        [self testLoginAllowUi:allowUi urlSchemeSuffix:suffix success:success failure:failure attemptsRemaining:4];
     }
 }
 
