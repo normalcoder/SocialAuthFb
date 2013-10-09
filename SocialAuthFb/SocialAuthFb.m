@@ -118,7 +118,7 @@
     }
     
     [FBSession setActiveSession:session];
-    [session openWithBehavior:FBSessionLoginBehaviorWithFallbackToWebView
+    [session openWithBehavior:FBSessionLoginBehaviorUseSystemAccountIfPresent
             completionHandler:    
      ^(FBSession * session, FBSessionState state, NSError * e) {
          switch (state) {
