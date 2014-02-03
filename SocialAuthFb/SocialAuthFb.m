@@ -1,5 +1,4 @@
 #import "SocialAuthFb.h"
-#import "AppOpenUrlNotification.h"
 #import "FacebookSDK.h"
 #import <Accounts/Accounts.h>
 
@@ -9,6 +8,9 @@
 @property (strong, nonatomic) NSDictionary<FBGraphUser> * user;
 
 @end
+
+static NSString* const AppOpenUrlNotification = @"AppOpenUrlNotification";
+static NSString* const AppOpenUrlNotificationUserInfoKey = @"AppOpenUrlNotificationUserInfoKey";
 
 @implementation SocialAuthFbSuccessObject
 
