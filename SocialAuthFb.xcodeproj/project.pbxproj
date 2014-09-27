@@ -205,6 +205,7 @@
 					"../facebook-ios-sdk/src",
 					../AppOpenUrlNotification/AppOpenUrlNotification,
 				);
+				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -222,6 +223,7 @@
 					"../facebook-ios-sdk/src",
 					../AppOpenUrlNotification/AppOpenUrlNotification,
 				);
+				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
